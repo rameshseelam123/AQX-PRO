@@ -1,1 +1,136 @@
+//@version=6
+indicator("AQX PRO Build-001", overlay=true, max_labels_count=500)
 
+//================ INPUTS =========================
+
+leftBars  = input.int(5, "Left Swing", minval=2)
+rightBars = input.int(5, "Right Swing", minval=2)
+
+showLabels = input.bool(true, "Show HH HL LH LL")
+
+//================ PIVOTS =========================
+
+ph = ta.pivothigh(high, leftBars, rightBars)
+pl = ta.pivotlow(low, leftBars, rightBars)
+
+//================ STORAGE ========================
+
+var float prevHigh = na
+var float lastHigh = na
+
+var float prevLow = na
+var float lastLow = na
+
+//================ HIGH ===========================
+
+if not na(ph)
+
+    prevHigh := lastHigh
+    lastHigh := ph
+
+    string txt = "H"
+
+    if not na(prevHigh)
+        txt := lastHigh > prevHigh ? "HH" : "LH"
+
+    if showLabels
+        label.new(
+             bar_index-rightBars,
+             ph,
+             txt,
+             style=label.style_label_down,
+             color=txt=="HH"?color.green:color.red,
+             textcolor=color.white)
+
+//================ LOW ============================
+
+if not na(pl)
+
+    prevLow := lastLow
+    lastLow := pl
+
+    string txt = "L"
+
+    if not na(prevLow)
+        txt := lastLow > prevLow ? "HL" : "LL"
+
+    if showLabels
+        label.new(
+             bar_index-rightBars,
+             pl,
+             txt,
+             style=label.style_label_up,
+             color=txt=="HL"?color.green:color.red,
+             textcolor=color.white)
+
+//================ PLOT ===========================
+
+plotshape(
+     not na(ph),
+     style=shape.triangledown,
+     location=location.abovebar,
+     color=color.red,
+     size=size.tiny,
+     offset=-rightBars)
+
+plotshape(
+     not na(pl),
+     style=shape.triangleup,
+     location=location.belowbar,
+     color=color.lime,
+     size=size.tiny,
+     offset=-rightBars)
+     //================ TREND ENGINE ========================
+
+// Current Structure
+
+bool bullishStructure =
+     not na(prevHigh) and
+     not na(prevLow) and
+     lastHigh > prevHigh and
+     lastLow > prevLow
+
+bool bearishStructure =
+     not na(prevHigh) and
+     not na(prevLow) and
+     lastHigh < prevHigh and
+     lastLow < prevLow
+
+// Trend State
+
+var int trend = 0
+
+if bullishStructure
+    trend := 1
+
+if bearishStructure
+    trend := -1
+
+// Background
+
+bgcolor(
+     trend == 1 ? color.new(color.green,92) :
+     trend == -1 ? color.new(color.red,92) :
+     na)
+
+// Trend Label
+
+if trend == 1 and bullishStructure
+    label.new(
+         bar_index,
+         high,
+         "UPTREND",
+         style=label.style_label_down,
+         color=color.green,
+         textcolor=color.white,
+         size=size.tiny)
+
+if trend == -1 and bearishStructure
+    label.new(
+         bar_index,
+         low,
+         "DOWNTREND",
+         style=label.style_label_up,
+         color=color.red,
+         textcolor=color.white,
+         size=size.tiny)

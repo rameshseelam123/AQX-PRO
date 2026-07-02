@@ -1,0 +1,77 @@
+//====================== BUILD-002 ======================
+// SMART BOS ENGINE
+//=======================================================
+
+// BOS Inputs
+showBOS = input.bool(true, "Show BOS", group="BOS")
+
+// BOS Variables
+var float bullBOSPrice = na
+var float bearBOSPrice = na
+
+// Bullish BOS
+bullBOS =
+     showBOS and
+     not na(lastHigh) and
+     ta.crossover(close, lastHigh)
+
+// Bearish BOS
+bearBOS =
+     showBOS and
+     not na(lastLow) and
+     ta.crossunder(close, lastLow)
+
+// Draw Bull BOS
+if bullBOS
+
+    bullBOSPrice := lastHigh
+
+    line.new(
+         x1 = bar_index,
+         y1 = bullBOSPrice,
+         x2 = bar_index + 10,
+         y2 = bullBOSPrice,
+         color = color.lime,
+         width = 2)
+
+    label.new(
+         x = bar_index,
+         y = bullBOSPrice,
+         text = "BOS ↑",
+         style = label.style_label_up,
+         color = color.green,
+         textcolor = color.white,
+         size = size.small)
+
+// Draw Bear BOS
+if bearBOS
+
+    bearBOSPrice := lastLow
+
+    line.new(
+         x1 = bar_index,
+         y1 = bearBOSPrice,
+         x2 = bar_index + 10,
+         y2 = bearBOSPrice,
+         color = color.red,
+         width = 2)
+
+    label.new(
+         x = bar_index,
+         y = bearBOSPrice,
+         text = "BOS ↓",
+         style = label.style_label_down,
+         color = color.red,
+         textcolor = color.white,
+         size = size.small)
+
+// Alerts
+alertcondition(
+     bullBOS,
+     title="Bullish BOS",
+     message="AQX PRO : Bullish Break of Structure")
+
+alertcondition(
+     bearBOS,
+     title="Bearish BOS",
+     message="AQX PRO : Bearish Break of Structure")

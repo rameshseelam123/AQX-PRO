@@ -1,0 +1,80 @@
+//================ BUILD-005 ==========================
+// TREND STATE ENGINE (Replace existing Trend Engine)
+//=====================================================
+
+// Trend States
+//  1  = Bullish
+// -1  = Bearish
+//  0  = Neutral
+
+var int trendState = 0
+
+// Structure Conditions
+newBullStructure =
+     not na(prevHigh) and
+     not na(prevLow) and
+     lastHigh > prevHigh and
+     lastLow > prevLow
+
+newBearStructure =
+     not na(prevHigh) and
+     not na(prevLow) and
+     lastHigh < prevHigh and
+     lastLow < prevLow
+
+// Trend Lock
+
+if trendState != 1 and newBullStructure
+    trendState := 1
+
+if trendState != -1 and newBearStructure
+    trendState := -1
+
+// Background
+
+bgcolor(
+     trendState == 1 ?
+     color.new(color.green,92) :
+     trendState == -1 ?
+     color.new(color.red,92) :
+     na)
+
+//=====================================================
+// ONE-TIME TREND LABELS
+//=====================================================
+
+var int lastTrendState = 0
+
+bullTrendChange =
+     trendState == 1 and
+     lastTrendState != 1
+
+bearTrendChange =
+     trendState == -1 and
+     lastTrendState != -1
+
+if bullTrendChange
+
+    label.new(
+         bar_index,
+         low,
+         "UPTREND",
+         style=label.style_label_up,
+         color=color.lime,
+         textcolor=color.white,
+         size=size.small)
+
+    lastTrendState := 1
+
+if bearTrendChange
+
+    label.new(
+         bar_index,
+         high,
+         "DOWNTREND",
+         style=label.style_label_down,
+         color=color.red,
+         textcolor=color.white,
+         size=size.small)
+
+    lastTrendState := -1
